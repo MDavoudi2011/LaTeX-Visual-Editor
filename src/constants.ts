@@ -68,6 +68,50 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 	before skip=15pt, after skip=15pt
 }
 
+% --- Added for Visual Editor Mac-style Code Box ---
+\\usepackage{listings}
+\\definecolor{codeBG}{HTML}{1E1E1E}
+\\definecolor{macRed}{HTML}{FF5F56}
+\\definecolor{macYellow}{HTML}{FFBD2E}
+\\definecolor{macGreen}{HTML}{27C93F}
+
+\\newtcolorbox{maccodebox}[1][]{
+    enhanced,
+    colback=codeBG,
+    colframe=codeBG,
+    arc=8pt,
+    boxrule=0pt,
+    top=20pt,bottom=5pt,left=5pt,right=5pt,
+    overlay={
+        \\fill[macRed] ([xshift=15pt,yshift=-12pt]frame.north west) circle (4pt);
+        \\fill[macYellow] ([xshift=27pt,yshift=-12pt]frame.north west) circle (4pt);
+        \\fill[macGreen] ([xshift=39pt,yshift=-12pt]frame.north west) circle (4pt);
+    },
+    #1
+}
+
+\\lstset{
+    backgroundcolor=\\color{codeBG},
+    basicstyle=\\color{white}\\ttfamily\\footnotesize,
+    numbers=left,
+    numberstyle=\\color{gray}\\ttfamily\\footnotesize,
+    stepnumber=1,
+    numbersep=10pt,
+    xleftmargin=20pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    frame=none,
+    rulecolor=\\color{black},
+    tabsize=2,
+    breaklines=true,
+    breakatwhitespace=true,
+    keywordstyle=\\color{blue!40!white},
+    commentstyle=\\color{green!40!white},
+    stringstyle=\\color{red!40!white},
+}
+% --------------------------------------------------
+
 \\usepackage{xepersian}
 \\settextfont[
   Path=./,

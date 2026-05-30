@@ -1,4 +1,4 @@
-export type BlockType = 'header' | 'section' | 'paragraph' | 'notebox' | 'warnbox' | 'examplebox';
+export type BlockType = 'header' | 'section' | 'paragraph' | 'notebox' | 'warnbox' | 'examplebox' | 'pic' | 'code';
 
 export interface BaseBlock {
   id: string;
@@ -29,12 +29,30 @@ export interface ParagraphBlock extends BaseBlock {
   };
 }
 
+export interface PicBlock extends BaseBlock {
+  type: 'pic';
+  data: {
+    url: string;
+  };
+}
+
+export interface CodeBlock extends BaseBlock {
+  type: 'code';
+  data: {
+    language: string;
+    code: string;
+  };
+}
+
+export type InnerBlock = ParagraphBlock | PicBlock | CodeBlock;
+
 export interface BoxBlock extends BaseBlock {
   type: 'notebox' | 'warnbox' | 'examplebox';
   data: {
     title: string;
-    content: string;
+    content?: string;
+    items?: InnerBlock[];
   };
 }
 
-export type AnyBlock = HeaderBlock | SectionBlock | ParagraphBlock | BoxBlock;
+export type AnyBlock = HeaderBlock | SectionBlock | ParagraphBlock | BoxBlock | PicBlock | CodeBlock;
