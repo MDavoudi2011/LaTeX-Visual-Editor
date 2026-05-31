@@ -9,52 +9,45 @@ interface InlineEditorProps {
 }
 
 export function InlineEditor({ html, onChange, tagName = 'div', className = '', placeholder }: InlineEditorProps) {
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  const resize = () => {
-    if (textareaRef.current) {
-      textareaRef.current.style.height = 'auto';
-      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
-    }
-  };
+  const ref = useRef<HTMLElement>(null);
+  const lastHtml = useRef(html);
 
   useEffect(() => {
-    resize();
+    if (ref.current && html !== lastHtml.current) {
+      if (document.activeElement !== ref.current) {
+        ref.current.innerHTML = html;
+        lastHtml.current = html;
+      }
+    }
   }, [html]);
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
+    const value = e.currentTarget.innerHTML;
+    lastHtml.current = value;
+    onChange(value);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.ctrlKey && e.key === 'b') {
       e.preventDefault();
-      const target = e.currentTarget;
-      const start = target.selectionStart;
-      const end = target.selectionEnd;
-      const val = target.value;
-      const selected = val.substring(start, end);
-      const newVal = val.substring(0, start) + `**${selected}**` + val.substring(end);
-      onChange(newVal);
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.selectionStart = start + 2;
-          textareaRef.current.selectionEnd = end + 2;
-        }
-      }, 0);
+      document.execCommand('bold', false);
+    } else if (e.ctrlKey && e.key === 'i') {
+      e.preventDefault();
+      document.execCommand('italic', false);
+    } else if (e.ctrlKey && e.key === 'u') {
+      e.preventDefault();
+      document.execCommand('underline', false);
     }
   };
 
-  return (
-    <textarea
-      ref={textareaRef}
-      value={html}
-      onChange={(e) => {
-        onChange(e.target.value);
-        resize();
-      }}
-      onKeyDown={handleKeyDown}
-      className={`w-full bg-transparent resize-none overflow-hidden outline-none ${className}`}
-      placeholder={placeholder}
-      rows={1}
-      dir={html ? "auto" : "rtl"}
-      style={{ minHeight: '1.5em' }}
-    />
-  );
+  return React.createElement(tagName, {
+    ref,
+    className: `outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 cursor-text ${className}`,
+    contentEditable: true,
+    onBlur: handleBlur,
+    onKeyDown: handleKeyDown,
+    'data-placeholder': placeholder,
+    suppressContentEditableWarning: true,
+    dangerouslySetInnerHTML: { __html: html }
+  });
 }

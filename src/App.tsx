@@ -180,11 +180,11 @@ function App() {
   if (!isLoaded) return null;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC]" style={{ direction: 'rtl' }}>
+    <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden bg-[#F8FAFC]" style={{ direction: 'rtl' }}>
       
       {/* Sidebar Editor (Right) */}
       <div 
-         className="relative flex-shrink-0 h-full bg-gray-50/50 border-l border-gray-200 z-20 flex"
+         className="relative flex-shrink-0 h-full bg-gray-50/50 border-r border-gray-200 z-20 flex max-md:h-[40vh] max-md:!w-full max-md:border-b md:border-l"
          style={{ width: sidebarWidth }}
       >
         <div className="flex-1 overflow-hidden w-full h-full">
@@ -197,7 +197,7 @@ function App() {
         </div>
         {/* Resizer Handle */}
         <div 
-          className="w-1.5 cursor-col-resize hover:bg-blue-400 active:bg-blue-600 bg-transparent absolute left-0 top-0 bottom-0 z-50 transform -translate-x-1/2"
+          className="w-1.5 cursor-col-resize hover:bg-blue-400 active:bg-blue-600 bg-transparent absolute left-0 top-0 bottom-0 z-50 transform -translate-x-1/2 max-md:hidden"
           onMouseDown={(e) => { e.preventDefault(); setIsResizing(true); }}
         />
       </div>
@@ -206,23 +206,23 @@ function App() {
       <div className="flex-1 flex flex-col h-full overflow-hidden relative border-r border-gray-200">
         
         {/* Top bar tabs */}
-        <div className="flex items-center justify-between px-6 py-3 bg-white border-b border-gray-200 z-10 w-full shadow-sm sticky top-0">
-          <div className="flex items-center gap-4">
-             <span className="flex items-center gap-1 text-sm font-semibold text-green-600 bg-green-50 px-3 py-1.5 rounded-md border border-green-100">
-               <CheckCircle className="w-4 h-4" /> ذخیره شد
+        <div className="flex max-md:flex-col items-center max-md:justify-center justify-between px-6 py-3 bg-white border-b border-gray-200 z-10 w-full shadow-sm sticky top-0 gap-3">
+          <div className="flex items-center flex-wrap max-md:justify-center gap-4">
+             <span className="flex items-center gap-1 text-sm font-semibold text-green-600 bg-green-50 px-4 py-2 rounded-md border border-green-100">
+               <CheckCircle className="w-5 h-5" /> ذخیره شد
              </span>
              
-             <div className="h-6 w-px bg-gray-300 mx-2"></div>
+             <div className="h-6 w-px bg-gray-300 mx-1"></div>
              
              <button 
                onClick={() => setActiveTab('visual')}
-               className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'visual' ? 'bg-[#2B547E] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+               className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'visual' ? 'bg-[#2B547E] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
              >
                <Eye className="w-4 h-4" /> پیش‌نمایش
              </button>
              <button 
                onClick={() => setActiveTab('code')}
-               className={`flex items-center gap-2 px-3 py-1.5 text-sm font-semibold rounded-md transition-colors ${activeTab === 'code' ? 'bg-[#2B547E] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
+               className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'code' ? 'bg-[#2B547E] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
              >
                <Code className="w-4 h-4" /> کد LaTeX
              </button>
@@ -231,7 +231,7 @@ function App() {
           <button 
             onClick={handleCompile}
             disabled={isCompiling}
-            className="flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-colors bg-[#2B547E] text-white shadow-sm hover:bg-[#1a334d] disabled:opacity-70"
+            className="flex items-center max-md:w-full justify-center gap-2 px-4 py-2 text-sm font-semibold rounded-md transition-colors bg-[#2B547E] text-white shadow-sm hover:bg-[#1a334d] disabled:opacity-70"
           >
             {isCompiling ? <Loader2 className="w-4 h-4 animate-spin" /> : <Download className="w-4 h-4" />}
             {isCompiling ? 'در حال کامپایل...' : 'کامپایل و دانلود PDF'}

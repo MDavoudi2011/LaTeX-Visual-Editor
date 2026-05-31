@@ -5,7 +5,7 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { InlineEditor } from './InlineEditor';
 
-function DropZone({ onDrop, className = "h-4 w-full" }: { onDrop: (type: BlockType) => void, className?: string }) {
+function DropZone({ onDrop, className = "h-1.5 w-full" }: { onDrop: (type: BlockType) => void, className?: string }) {
   const [isOver, setIsOver] = useState(false);
   return (
     <div
@@ -17,7 +17,7 @@ function DropZone({ onDrop, className = "h-4 w-full" }: { onDrop: (type: BlockTy
         setIsOver(false); 
         onDrop(e.dataTransfer.getData('blockType') as BlockType); 
       }}
-      className={`transition-all rounded ${isOver ? 'bg-blue-300 border border-blue-500 shadow-inner' : 'opacity-0'} ${className}`}
+      className={`transition-all rounded ${isOver ? 'bg-blue-300 border border-blue-500 shadow-inner min-h-[8px]' : 'opacity-0'} ${className}`}
     />
   );
 }
@@ -138,7 +138,7 @@ export function VisualPreview({ blocks, onUpdateBlock, onUpdateInnerBlock, onDro
                   onChange={(e) => isStandalone ? onUpdateBlock(item.id, { code: e.target.value }) : onUpdateInnerBlock?.(boxId, item.id, { code: e.target.value })}
                   className="absolute inset-0 w-full h-full z-10 font-mono text-sm resize-y outline-none"
                   placeholder="Insert Code..."
-                  style={{ minHeight: '100px', background: 'transparent', color: 'transparent', caretColor: 'white', padding: '0.1rem 1rem 1rem 4.9rem', border: 'none' }}
+                  style={{ minHeight: '100px', background: 'transparent', color: 'transparent', caretColor: 'white', padding: '0.1rem 1rem 1rem 3.2rem', border: 'none' }}
                   spellCheck={false}
                />
                <div className="pointer-events-none" style={{ minHeight: '100px', padding: '0 1rem 1rem 1rem'}}>
@@ -336,7 +336,7 @@ export function VisualPreview({ blocks, onUpdateBlock, onUpdateInnerBlock, onDro
              <DropZone onDrop={(type) => onDropBlock?.(type, index)} />
              {renderRootBlock()}
              {index === blocks.length - 1 && (
-               <DropZone onDrop={(type) => onDropBlock?.(type, index + 1)} className="h-8 mt-4" />
+               <DropZone onDrop={(type) => onDropBlock?.(type, index + 1)} className="h-4 mt-2" />
              )}
           </React.Fragment>
         );
