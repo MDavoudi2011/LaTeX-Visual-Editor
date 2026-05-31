@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { AnyBlock, BlockType, InnerBlock } from '../types';
-import { GripVertical, Trash2, ChevronUp, ChevronDown, PlusCircle, Heading1, Hash, AlignLeft, List as ListIcon, Code2, Info, AlertTriangle, Lightbulb, MoveUpRight, ArrowDownToLine } from 'lucide-react';
+import { GripVertical, Trash2, ChevronUp, ChevronDown, PlusCircle, Heading1, Hash, AlignLeft, List as ListIcon, Code2, Info, AlertTriangle, Lightbulb, MoveUpRight, ArrowDownToLine, CornerDownLeft } from 'lucide-react';
 
 interface EditorProps {
   blocks: AnyBlock[];
   setBlocks: (blocks: AnyBlock[]) => void;
   onNestBlock: (sourceId: string, targetBoxId: string) => void;
   onExtractBlock: (sourceBoxId: string, itemId: string) => void;
+  onAddInnerBlock: (boxId: string, type: BlockType) => void;
 }
 
-export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock }: EditorProps) {
+export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddInnerBlock }: EditorProps) {
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const [draggedSourceIndex, setDraggedSourceIndex] = useState<number | null>(null);
+  const [draggedSourceId, setDraggedSourceId] = useState<string | null>(null);
   const hasHeader = blocks.some(b => b.type === 'header');
 
   const addBlock = (type: BlockType) => {
@@ -82,8 +86,42 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock }: Edito
                 <div 
                   key={block.id} 
                   draggable 
-                  onDragStart={(e) => { e.dataTransfer.setData('sourceId', block.id); }}
-                  className="bg-white rounded border border-gray-200 shadow-sm px-2 py-2 flex flex-col"
+                  onDragStart={(e) => { 
+                    e.dataTransfer.effectAllowed = 'move';
+                    e.dataTransfer.setData('sourceId', block.id);
+                    e.dataTransfer.setData('sourceIndex', index.toString());
+                    setDraggedSourceIndex(index);
+                    setDraggedSourceId(block.id);
+                  }}
+                  onDragEnd={() => {
+                    setDraggedSourceIndex(null);
+                    setDraggedSourceId(null);
+                    setDragOverIndex(null);
+                  }}
+                  onDragOver={(e) => {
+                     e.preventDefault();
+                     setDragOverIndex(index);
+                  }}
+                  onDragLeave={() => {
+                     if (dragOverIndex === index) {
+                         setDragOverIndex(null);
+                     }
+                  }}
+                  onDrop={(e) => {
+                     e.preventDefault();
+                     e.stopPropagation();
+                     setDragOverIndex(null);
+                     
+                     if (draggedSourceIndex !== null) {
+                         if (draggedSourceIndex !== index) {
+                             const newBlocks = [...blocks];
+                             const [moved] = newBlocks.splice(draggedSourceIndex, 1);
+                             newBlocks.splice(index, 0, moved);
+                             setBlocks(newBlocks);
+                         }
+                     }
+                  }}
+                  className={`bg-white rounded border shadow-sm px-2 py-2 flex flex-col transition-all duration-200 ${dragOverIndex === index ? 'border-t-2 border-t-blue-500 bg-blue-50 border-x-blue-300 border-b-blue-300' : 'border-gray-200'}`}
                 >
                  <div className="flex items-center w-full">
                    <div className="cursor-grab text-gray-400 hover:text-gray-600 mr-2 ml-1">
@@ -116,7 +154,10 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock }: Edito
                     <div className="pr-6 mt-1 border-r-2 border-gray-100 flex flex-col gap-1 w-full text-right">
                        {block.data.items && block.data.items.length > 0 && block.data.items.map((item: any) => (
                           <div key={item.id} className="text-[10px] text-gray-500 bg-gray-50 px-2 py-1 flex items-center justify-between rounded group">
-                             <span>⮑ {item.type === 'paragraph' ? 'پاراگراف' : item.type === 'list' ? 'لیست' : 'کد'}</span>
+                              <span className="flex items-center gap-1">
+                                <CornerDownLeft className="w-3 h-3" />
+                                {item.type === 'paragraph' ? 'پاراگراف' : item.type === 'list' ? 'لیست' : 'کد'}
+                              </span>
                              <button onClick={() => onExtractBlock(block.id, item.id)} className="text-blue-500 hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity" title="انتقال به بیرون">
                                <MoveUpRight className="w-3 h-3" />
                              </button>
@@ -127,12 +168,15 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock }: Edito
                           onDrop={(e) => {
                              e.preventDefault();
                              e.stopPropagation();
-                             const sourceId = e.dataTransfer.getData('sourceId');
+                             const sourceId = draggedSourceId || e.dataTransfer.getData('sourceId');
+                             const blockType = e.dataTransfer.getData('blockType');
                              if (sourceId) {
                                onNestBlock(sourceId, block.id);
+                             } else if (blockType) {
+                               onAddInnerBlock(block.id, blockType as BlockType);
                              }
                           }}
-                          className="text-[10px] text-gray-400 border border-dashed border-gray-300 rounded text-center py-1 bg-gray-50 mt-1 cursor-default"
+                          className="text-[10px] text-gray-400 border border-dashed border-gray-300 rounded text-center py-1 bg-gray-50 mt-1 cursor-default hover:bg-blue-50 hover:border-blue-300 hover:text-blue-500 transition-colors"
                        >
                           <ArrowDownToLine className="w-3 h-3 inline-block ml-1" />
                           اینجا رها کنید (Drop)

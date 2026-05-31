@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Editor } from './components/Editor';
 import { VisualPreview } from './components/VisualPreview';
 import { CodePreview } from './components/CodePreview';
-import { AnyBlock, BlockType } from './types';
+import { AnyBlock, BlockType, InnerBlock } from './types';
 import { Download, Loader2, CheckCircle, Code, Eye, FileCode } from 'lucide-react';
 import { generateLatex } from './lib/latexGenerator';
 
@@ -113,10 +113,10 @@ function App() {
       } else {
         for (const b of prev) {
           if (b.type === 'notebox' || b.type === 'warnbox' || b.type === 'examplebox') {
-             const it = (b.data.items || []).find((i: any) => i.id === sourceId);
+             const it = (b.data as any).items?.find((i: any) => i.id === sourceId);
              if (it) {
                sourceItem = it;
-               newPrev = newPrev.map(box => box.id === b.id ? { ...box, data: { ...box.data, items: box.data.items.filter((i:any) => i.id !== sourceId) } } as AnyBlock : box);
+               newPrev = newPrev.map(box => box.id === b.id ? { ...box, data: { ...box.data, items: (box.data as any).items.filter((i:any) => i.id !== sourceId) } } as AnyBlock : box);
                break;
              }
           }
@@ -127,20 +127,21 @@ function App() {
 
       return newPrev.map(b => {
         if (b.id === targetBoxId) {
-           return { ...b, data: { ...b.data, items: [...(b.data.items || []), sourceItem] } } as AnyBlock;
+           return { ...b, data: { ...b.data, items: [...((b.data as any).items || []), sourceItem] } } as AnyBlock;
         }
         return b;
       });
     });
   };
 
-  const handleExtractBlock = (sourceBoxId: string, itemId: string) => {
+    const handleExtractBlock = (sourceBoxId: string, itemId: string) => {
      setBlocks(prev => {
         let extracted: any = null;
         const newPrev = prev.map(b => {
            if (b.id === sourceBoxId) {
-              extracted = (b.data.items || []).find((i:any) => i.id === itemId);
-              return { ...b, data: { ...b.data, items: (b.data.items || []).filter((i:any) => i.id !== itemId) } } as AnyBlock;
+              const data = b.data as any;
+              extracted = (data.items || []).find((i:any) => i.id === itemId);
+              return { ...b, data: { ...data, items: (data.items || []).filter((i:any) => i.id !== itemId) } } as AnyBlock;
            }
            return b;
         });
@@ -177,6 +178,32 @@ function App() {
     }
   }, [isResizing]);
 
+  const handleAddInnerBlock = (boxId: string, type: BlockType) => {
+    setBlocks(prev => {
+      let newItem: InnerBlock | null = null;
+      const id = Date.now().toString();
+      if (type === 'paragraph') {
+        newItem = { id, type: 'paragraph', data: { content: '' } };
+      } else if (type === 'code') {
+        newItem = { id, type: 'code', data: { language: 'javascript', code: '' } };
+      } else if (type === 'list') {
+        newItem = { id, type: 'list', data: { items: [''] } };
+      }
+
+      if (!newItem) {
+        alert('این نوع بلوک را نمی‌توان داخل باکس قرار داد.');
+        return prev;
+      }
+
+      return prev.map(b => {
+        if (b.id === boxId) {
+             return { ...b, data: { ...b.data, items: [...((b.data as any).items || []), newItem] } } as AnyBlock;
+        }
+        return b;
+      });
+    });
+  };
+
   if (!isLoaded) return null;
 
   return (
@@ -193,6 +220,7 @@ function App() {
              setBlocks={setBlocks} 
              onNestBlock={handleNestBlock}
              onExtractBlock={handleExtractBlock}
+             onAddInnerBlock={handleAddInnerBlock}
            />
         </div>
         {/* Resizer Handle */}
