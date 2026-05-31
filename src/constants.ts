@@ -110,8 +110,29 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
     commentstyle=\\color{green!40!white},
     stringstyle=\\color{red!40!white},
 }
+
+\\lstdefinelanguage{css}{
+  keywords={color,background-image:,margin,padding,font,weight,display,position,top,left,right,bottom,list,style,border,size,white,space,min,width, transition:, transform:, transition-property, transition-duration, transition-timing-function},	
+  sensitive=true,
+  morecomment=[l]{//},
+  morecomment=[s]{/*}{*/},
+  morestring=[b]',
+  morestring=[b]",
+  alsoletter={:}
+}
+\\lstdefinelanguage{javascript}{
+  morekeywords={typeof, new, true, false, catch, function, return, null, catch, switch, var, if, in, while, do, else, case, break},
+  morecomment=[s]{/*}{*/},
+  morecomment=[l]//,
+  morestring=[b]",
+  morestring=[b]'
+}
+\\lstalias{typescript}{javascript}
+\\lstalias{html}{HTML}
+
 % --------------------------------------------------
 
+\\usepackage[hidelinks]{hyperref}
 \\usepackage{xepersian}
 \\settextfont[
   Path=./,
