@@ -12,7 +12,12 @@ export const generateLatex = (blocks: any[]) => {
         const listItems = (item.data.items || []).map((li: string) => `\\item ${htmlToLatex(li)}`).join('\n');
         innerContent += `\\begin{itemize}\n${listItems}\n\\end{itemize}\n\n`;
       } else if (item.type === 'code') {
-        innerContent += `\\begin{maccodebox}\n\\begin{LTR}\n\\begin{lstlisting}[language=${item.data.language || 'HTML'}]\n${item.data.code}\n\\end{lstlisting}\n\\end{LTR}\n\\end{maccodebox}\n\n`;
+        const escapedCode = (item.data.code || '').replace(/((?:#|\/\/)\s*)(.*[\u0600-\u06FF\u200C]+.*)/g, (match, prefix, text) => {
+           const safePrefix = prefix.replace(/#/g, '\\#').replace(/%/g, '\\%');
+           const safeText = text.replace(/#/g, '\\#').replace(/%/g, '\\%');
+           return `(*@\\normalfont\\textcolor{green!40!white}{${safePrefix}\\rl{${safeText}}}@*)`;
+        });
+        innerContent += `\\begin{maccodebox}\n\\begin{LTR}\n\\begin{lstlisting}[language=${item.data.language || 'HTML'},escapeinside={(*@}{@*)}]\n${escapedCode}\n\\end{lstlisting}\n\\end{LTR}\n\\end{maccodebox}\n\n`;
       }
     });
     return innerContent;
@@ -24,7 +29,7 @@ export const generateLatex = (blocks: any[]) => {
         content += `\\header{${block.data.title}}{${block.data.subtitle}}{${block.data.instructor}}\n\n`;
         break;
       case 'section':
-        content += `\\section{${block.data.title}}\n\n`;
+        content += `\\needspace{8\\baselineskip}\n\\section*{${block.data.title}}\n\n`;
         break;
       case 'paragraph':
         content += `${htmlToLatex(block.data.content)}\n\n`;
@@ -34,7 +39,12 @@ export const generateLatex = (blocks: any[]) => {
         content += `\\begin{itemize}\n${listItems}\n\\end{itemize}\n\n`;
         break;
       case 'code':
-        content += `\\begin{maccodebox}\n\\begin{LTR}\n\\begin{lstlisting}[language=${block.data.language || 'HTML'}]\n${block.data.code}\n\\end{lstlisting}\n\\end{LTR}\n\\end{maccodebox}\n\n`;
+        const escapedCode = (block.data.code || '').replace(/((?:#|\/\/)\s*)(.*[\u0600-\u06FF\u200C]+.*)/g, (match, prefix, text) => {
+           const safePrefix = prefix.replace(/#/g, '\\#').replace(/%/g, '\\%');
+           const safeText = text.replace(/#/g, '\\#').replace(/%/g, '\\%');
+           return `(*@\\normalfont\\textcolor{green!40!white}{${safePrefix}\\rl{${safeText}}}@*)`;
+        });
+        content += `\\begin{maccodebox}\n\\begin{LTR}\n\\begin{lstlisting}[language=${block.data.language || 'HTML'},escapeinside={(*@}{@*)}]\n${escapedCode}\n\\end{lstlisting}\n\\end{LTR}\n\\end{maccodebox}\n\n`;
         break;
       case 'notebox':
       case 'warnbox':

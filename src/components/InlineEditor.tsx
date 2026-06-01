@@ -27,6 +27,12 @@ export function InlineEditor({ html, onChange, tagName = 'div', className = '', 
     onChange(value);
   };
 
+  const handlePaste = (e: React.ClipboardEvent<HTMLElement>) => {
+    e.preventDefault();
+    const text = e.clipboardData.getData('text/plain');
+    document.execCommand('insertText', false, text);
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.ctrlKey && e.key === 'b') {
       e.preventDefault();
@@ -45,6 +51,7 @@ export function InlineEditor({ html, onChange, tagName = 'div', className = '', 
     className: `outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 cursor-text ${className}`,
     contentEditable: true,
     onBlur: handleBlur,
+    onPaste: handlePaste,
     onKeyDown: handleKeyDown,
     'data-placeholder': placeholder,
     suppressContentEditableWarning: true,

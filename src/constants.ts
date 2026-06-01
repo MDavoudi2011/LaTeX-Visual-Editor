@@ -17,6 +17,8 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \\usetikzlibrary{calc}
 \\usepackage{eso-pic}
 \\usepackage{setspace}
+\\usepackage{needspace}
+\\usepackage{parskip}
 
 \\definecolor{mainColor}{HTML}{2B547E}    
 \\definecolor{accentColor}{HTML}{E74C3C}  
@@ -45,7 +47,7 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 {\\color{mainColor!80!black}\\thesubsection}{1em}{}
 
 \\newtcolorbox{notebox}[1][نکته]{
-	enhanced, colback=noteBg, colframe=mainColor, coltitle=white,
+	enhanced, breakable, colback=noteBg, colframe=mainColor, coltitle=white,
 	fonttitle=\\bfseries, title={\\faInfoCircle\\quad #1},
 	boxrule=1.2pt, arc=5pt, drop shadow,
 	left=10pt, right=10pt, top=10pt, bottom=10pt,
@@ -53,7 +55,7 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 }
 
 \\newtcolorbox{warnbox}[1][مهم]{
-	enhanced, colback=warnBg, colframe=accentColor, coltitle=white,
+	enhanced, breakable, colback=warnBg, colframe=accentColor, coltitle=white,
 	fonttitle=\\bfseries, title={\\faExclamationTriangle\\quad #1},
 	boxrule=1.2pt, arc=5pt, drop shadow,
 	left=10pt, right=10pt, top=10pt, bottom=10pt,
@@ -61,7 +63,7 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 }
 
 \\newtcolorbox{examplebox}[1][مثال]{
-	enhanced, colback=exampleBg, colframe=exampleFrame, coltitle=white,
+	enhanced, breakable, colback=exampleBg, colframe=exampleFrame, coltitle=white,
 	fonttitle=\\bfseries, title={\\faLightbulb\\quad #1},
 	boxrule=1.5pt, arc=8pt, drop shadow,
 	left=15pt, right=15pt, top=15pt, bottom=15pt,
@@ -76,7 +78,7 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \\definecolor{macGreen}{HTML}{27C93F}
 
 \\newtcolorbox{maccodebox}[1][]{
-    enhanced,
+    enhanced, breakable,
     colback=codeBG,
     colframe=codeBG,
     arc=8pt,
@@ -142,6 +144,14 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   AutoFakeSlant
 ]{Vazirmatn-Regular}
 
+\\setlatintextfont[
+  Path=./,
+  Extension=.ttf,
+  BoldFont=Vazirmatn-Bold,
+  Scale=1.1,
+  AutoFakeSlant
+]{Vazirmatn-Regular}
+
 \\setdigitfont[
   Path=./,
   Extension=.ttf,
@@ -166,7 +176,7 @@ export const LATEX_PREAMBLE = `%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 		
 		{\\Large \\textbf{\\textcolor{mainColor!80!black}{#2}} \\par}		
 
-        {\\Large \\textbf{\\textcolor{mainColor!80!black}{تهیه شده توسط گروه برنامه نویسی هوشیار}} \\par}
+        {\\Large \\textbf{\\textcolor{mainColor!80!black}{تهیه شده توسط انجمن برنامه نویسی هوشیار}} \\par}
         
     	\\vspace{0.5cm}
     	

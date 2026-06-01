@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AnyBlock, BlockType, InnerBlock } from '../types';
-import { GripVertical, Trash2, ChevronUp, ChevronDown, PlusCircle, Heading1, Hash, AlignLeft, List as ListIcon, Code2, Info, AlertTriangle, Lightbulb, MoveUpRight, ArrowDownToLine, CornerDownLeft } from 'lucide-react';
+import { GripVertical, Trash2, ChevronUp, ChevronDown, PlusCircle, Heading1, Hash, AlignLeft, List as ListIcon, Code2, Info, AlertTriangle, Lightbulb, MoveUpRight, ArrowDownToLine, CornerDownLeft, ChevronLeft } from 'lucide-react';
 
 interface EditorProps {
   blocks: AnyBlock[];
@@ -8,12 +8,14 @@ interface EditorProps {
   onNestBlock: (sourceId: string, targetBoxId: string) => void;
   onExtractBlock: (sourceBoxId: string, itemId: string) => void;
   onAddInnerBlock: (boxId: string, type: BlockType) => void;
+  activeBlockId?: string | null;
 }
 
-export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddInnerBlock }: EditorProps) {
+export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddInnerBlock, activeBlockId }: EditorProps) {
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   const [draggedSourceIndex, setDraggedSourceIndex] = useState<number | null>(null);
   const [draggedSourceId, setDraggedSourceId] = useState<string | null>(null);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>({});
   const hasHeader = blocks.some(b => b.type === 'header');
 
   const addBlock = (type: BlockType) => {
@@ -24,7 +26,7 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddIn
       case 'section': newBlock = { id: newId, type: 'section', data: { title: '' } }; break;
       case 'paragraph': newBlock = { id: newId, type: 'paragraph', data: { content: '' } }; break;
       case 'list': newBlock = { id: newId, type: 'list', data: { items: [''] } }; break;
-      case 'code': newBlock = { id: newId, type: 'code', data: { language: 'CSS', code: '' } }; break;
+      case 'code': newBlock = { id: newId, type: 'code', data: { language: 'python', code: '' } }; break;
       case 'notebox':
       case 'warnbox':
       case 'examplebox': newBlock = { id: newId, type, data: { title: '', items: [] } }; break;
@@ -82,7 +84,18 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddIn
             <div className="text-center text-xs text-gray-400 mt-4">خالی است</div>
           ) : (
             <div className="space-y-2">
-              {blocks.map((block, index) => (
+              {(() => {
+                 let currentSectionId: string | null = null;
+                 return blocks.map((block, index) => {
+                   if (block.type === 'section') {
+                      currentSectionId = block.id;
+                   }
+                   const isInsideSection = block.type !== 'section' && currentSectionId !== null;
+                   const isHidden = block.type !== 'section' && currentSectionId && collapsedSections[currentSectionId];
+                   
+                   if (isHidden) return null;
+
+                   return (
                 <div 
                   key={block.id} 
                   draggable 
@@ -112,6 +125,8 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddIn
                      e.stopPropagation();
                      setDragOverIndex(null);
                      
+                     const blockType = e.dataTransfer.getData('blockType');
+                     
                      if (draggedSourceIndex !== null) {
                          if (draggedSourceIndex !== index) {
                              const newBlocks = [...blocks];
@@ -119,11 +134,39 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddIn
                              newBlocks.splice(index, 0, moved);
                              setBlocks(newBlocks);
                          }
+                     } else if (blockType) {
+                         // Dragged from Add Block menu
+                         const newId = crypto.randomUUID();
+                         let newBlock: AnyBlock | null = null;
+                         switch (blockType as BlockType) {
+                           case 'header': newBlock = { id: newId, type: 'header', data: { title: '', subtitle: '', instructor: '', mentor: 'مهندس مینا طرهانی' } }; break;
+                           case 'section': newBlock = { id: newId, type: 'section', data: { title: '' } }; break;
+                           case 'paragraph': newBlock = { id: newId, type: 'paragraph', data: { content: '' } }; break;
+                           case 'list': newBlock = { id: newId, type: 'list', data: { items: [''] } }; break;
+                           case 'code': newBlock = { id: newId, type: 'code', data: { language: 'python', code: '' } }; break;
+                           case 'notebox':
+                           case 'warnbox':
+                           case 'examplebox': newBlock = { id: newId, type: blockType as any, data: { title: '', items: [] } }; break;
+                         }
+                         if (newBlock) {
+                             const newBlocks = [...blocks];
+                             newBlocks.splice(index, 0, newBlock);
+                             setBlocks(newBlocks);
+                         }
                      }
                   }}
-                  className={`bg-white rounded border shadow-sm px-2 py-2 flex flex-col transition-all duration-200 ${dragOverIndex === index ? 'border-t-2 border-t-blue-500 bg-blue-50 border-x-blue-300 border-b-blue-300' : 'border-gray-200'}`}
+                  className={`bg-white rounded border shadow-sm px-2 py-2 flex flex-col transition-all duration-200 group ${isInsideSection ? 'mr-4' : ''} ${block.type === 'section' ? 'border-gray-300 bg-gray-50' : ''} ${dragOverIndex === index ? 'border-t-2 border-t-blue-500 bg-blue-50 border-x-blue-300 border-b-blue-300' : activeBlockId === block.id ? 'border-2 border-blue-400 bg-blue-50/30' : 'border-gray-200'} relative overflow-hidden`}
                 >
+                 {activeBlockId === block.id && <div className="absolute right-0 top-0 bottom-0 w-1 bg-blue-500" />}
                  <div className="flex items-center w-full">
+                   {block.type === 'section' && (
+                     <button 
+                        onClick={() => setCollapsedSections(prev => ({...prev, [block.id]: !prev[block.id]}))}
+                        className="text-gray-400 hover:text-gray-600 p-0.5 rounded hover:bg-gray-200 ml-1"
+                     >
+                       {collapsedSections[block.id] ? <ChevronLeft className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                     </button>
+                   )}
                    <div className="cursor-grab text-gray-400 hover:text-gray-600 mr-2 ml-1">
                      <GripVertical className="w-4 h-4" />
                    </div>
@@ -137,14 +180,14 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddIn
                      {block.type === 'warnbox' && 'باکس مهم'}
                      {block.type === 'examplebox' && 'باکس مثال'}
                    </span>
-                   <div className="flex items-center">
-                     <button onClick={() => moveBlock(index, 'up')} disabled={index === 0} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30">
+                   <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity bg-white pl-1 absolute left-1">
+                     <button onClick={() => moveBlock(index, 'up')} disabled={index === 0} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title="بالا">
                        <ChevronUp className="w-3 h-3" />
                      </button>
-                     <button onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30">
+                     <button onClick={() => moveBlock(index, 'down')} disabled={index === blocks.length - 1} className="p-1 text-gray-400 hover:text-gray-700 disabled:opacity-30" title="پایین">
                        <ChevronDown className="w-3 h-3" />
                      </button>
-                     <button onClick={() => deleteBlock(block.id)} className="p-1 text-red-400 hover:text-red-600">
+                     <button onClick={() => deleteBlock(block.id)} className="p-1 text-red-400 hover:text-red-600" title="حذف">
                        <Trash2 className="w-3 h-3" />
                      </button>
                    </div>
@@ -184,7 +227,8 @@ export function Editor({ blocks, setBlocks, onNestBlock, onExtractBlock, onAddIn
                     </div>
                  )}
               </div>
-            ))}
+            );
+         })})()}
           </div>
         )}
         </div>

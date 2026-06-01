@@ -1,5 +1,6 @@
 export function htmlToLatex(html: string): string {
   if (!html) return '';
+  
   let tex = html;
   
   // Clean up div and p tags representing new lines

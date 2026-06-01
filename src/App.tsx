@@ -50,7 +50,7 @@ function App() {
       case 'section': newBlock = { id: newId, type: 'section', data: { title: '' } }; break;
       case 'paragraph': newBlock = { id: newId, type: 'paragraph', data: { content: '' } }; break;
       case 'list': newBlock = { id: newId, type: 'list', data: { items: [''] } }; break;
-      case 'code': newBlock = { id: newId, type: 'code', data: { language: 'CSS', code: '' } }; break;
+      case 'code': newBlock = { id: newId, type: 'code', data: { language: 'python', code: '' } }; break;
       case 'notebox':
       case 'warnbox':
       case 'examplebox': newBlock = { id: newId, type, data: { title: '', items: [] } }; break;
@@ -73,7 +73,7 @@ function App() {
     switch (type) {
       case 'paragraph': newBlock = { id: newId, type: 'paragraph', data: { content: '' } }; break;
       case 'list': newBlock = { id: newId, type: 'list', data: { items: [''] } }; break;
-      case 'code': newBlock = { id: newId, type: 'code', data: { language: 'css', code: '' } }; break;
+      case 'code': newBlock = { id: newId, type: 'code', data: { language: 'python', code: '' } }; break;
       default: return; // Only these 3 are allowed as InnerBlocks
     }
     setBlocks(prev => prev.map(b => {
@@ -178,6 +178,8 @@ function App() {
     }
   }, [isResizing]);
 
+  const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+
   const handleAddInnerBlock = (boxId: string, type: BlockType) => {
     setBlocks(prev => {
       let newItem: InnerBlock | null = null;
@@ -221,6 +223,7 @@ function App() {
              onNestBlock={handleNestBlock}
              onExtractBlock={handleExtractBlock}
              onAddInnerBlock={handleAddInnerBlock}
+             activeBlockId={activeBlockId}
            />
         </div>
         {/* Resizer Handle */}
@@ -277,6 +280,7 @@ function App() {
                   onUpdateInnerBlock={handleUpdateInnerBlock}
                   onDropBlock={handleDropBlock}
                   onDropInnerBlock={handleDropInnerBlock}
+                  setActiveBlockId={setActiveBlockId}
                 />
              ) : (
                 <CodePreview blocks={blocks} />
