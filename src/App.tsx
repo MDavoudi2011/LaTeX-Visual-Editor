@@ -88,15 +88,36 @@ function App() {
   const handleCompile = async () => {
     setIsCompiling(true);
     
-    // Simulate generation and compilation time
-    const latexCode = generateLatex(blocks);
-    console.log("Generated LaTeX payload:", latexCode);
-    
-    // Simulate a 4 second network request to compiling server
-    await new Promise(r => setTimeout(r, 4000));
-    
-    alert("با موفقیت کامپایل شد (درخواست نهایی باید به سرور متصل شود).");
-    setIsCompiling(false);
+    try {
+      const latexCode = generateLatex(blocks);
+      
+      const response = await fetch("http://85.133.205.137:3001/api/compile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ texCode: latexCode }),
+      });
+      
+      const data = await response.json();
+      
+      if (data.success && data.pdfUrl) {
+        const link = document.createElement('a');
+        link.href = data.pdfUrl;
+        link.target = '_blank';
+        link.download = 'document.pdf';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert("خطا در کامپایل فایل.");
+      }
+    } catch (error) {
+      console.error("Compilation error:", error);
+      alert("خطا در ارتباط با سرور.");
+    } finally {
+      setIsCompiling(false);
+    }
   };
 
   const handleNestBlock = (sourceId: string, targetBoxId: string) => {
