@@ -91,7 +91,7 @@ function App() {
     try {
       const latexCode = generateLatex(blocks);
       
-      const response = await fetch("https://texapi.aminmadani.ir:3001/api/compile", {
+      const response = await fetch("https://texapi.aminmadani.xyz:3001/api/compile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
