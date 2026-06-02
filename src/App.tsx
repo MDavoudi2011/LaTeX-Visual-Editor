@@ -5,6 +5,7 @@ import { CodePreview } from './components/CodePreview';
 import { AnyBlock, BlockType, InnerBlock } from './types';
 import { Download, Loader2, CheckCircle, Code, Eye, FileCode } from 'lucide-react';
 import { generateLatex } from './lib/latexGenerator';
+import { LATEX_PREAMBLE } from './constants';
 
 function App() {
   const [blocks, setBlocks] = useState<AnyBlock[]>([]);
@@ -89,14 +90,15 @@ function App() {
     setIsCompiling(true);
     
     try {
-      const latexCode = generateLatex(blocks);
+      const content = generateLatex(blocks);
+      const fullLatex = `${LATEX_PREAMBLE}\n\\begin{document}\n\n\\setstretch{1.5}\n\\addwatermark\n\n${content}\\end{document}\n`;
       
       const response = await fetch("https://texapi.aminmadani.xyz:3001/api/compile", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ texCode: latexCode }),
+        body: JSON.stringify({ texCode: fullLatex }),
       });
       
       const data = await response.json();
@@ -127,7 +129,7 @@ function App() {
       
       if (sourceItem) {
         if (!['paragraph', 'list', 'code'].includes(sourceItem.type)) {
-          alert('این بلوک را نمی‌توان داخل باکس قرار داد.');
+          alert('این بلوک را نمیتوان داخل باکس قرار داد.');
           return prev;
         }
         newPrev = prev.filter(b => b.id !== sourceId);
@@ -214,7 +216,7 @@ function App() {
       }
 
       if (!newItem) {
-        alert('این نوع بلوک را نمی‌توان داخل باکس قرار داد.');
+        alert('این نوع بلوک را نمیتوان داخل باکس قرار داد.');
         return prev;
       }
 
@@ -270,7 +272,7 @@ function App() {
                onClick={() => setActiveTab('visual')}
                className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'visual' ? 'bg-[#2B547E] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
              >
-               <Eye className="w-4 h-4" /> پیش‌نمایش
+               <Eye className="w-4 h-4" /> پیشنمایش
              </button>
              <button 
                onClick={() => setActiveTab('code')}
