@@ -106,7 +106,6 @@ function App() {
       if (data.success && data.pdfUrl) {
         const link = document.createElement('a');
         link.href = data.pdfUrl;
-        link.target = '_blank';
         link.download = 'document.pdf';
         document.body.appendChild(link);
         link.click();
@@ -129,7 +128,7 @@ function App() {
       
       if (sourceItem) {
         if (!['paragraph', 'list', 'code'].includes(sourceItem.type)) {
-          alert('این بلوک را نمیتوان داخل باکس قرار داد.');
+          alert('این بلوک را نمی‌توان داخل باکس قرار داد.');
           return prev;
         }
         newPrev = prev.filter(b => b.id !== sourceId);
@@ -216,7 +215,7 @@ function App() {
       }
 
       if (!newItem) {
-        alert('این نوع بلوک را نمیتوان داخل باکس قرار داد.');
+        alert('این نوع بلوک را نمی‌توان داخل باکس قرار داد.');
         return prev;
       }
 
@@ -272,7 +271,7 @@ function App() {
                onClick={() => setActiveTab('visual')}
                className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors ${activeTab === 'visual' ? 'bg-[#2B547E] text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'}`}
              >
-               <Eye className="w-4 h-4" /> پیشنمایش
+               <Eye className="w-4 h-4" /> پیش‌نمایش
              </button>
              <button 
                onClick={() => setActiveTab('code')}
