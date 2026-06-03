@@ -26,10 +26,10 @@ export const generateLatex = (blocks: any[]) => {
   blocks.forEach((block) => {
     switch (block.type) {
       case 'header':
-        content += `\\header{${block.data.title}}{${block.data.subtitle}}{${block.data.instructor}}\n\n`;
+        content += `\\header{${htmlToLatex(block.data.title || '')}}{${htmlToLatex(block.data.subtitle || '')}}{${htmlToLatex(block.data.instructor || '')}}\n\n`;
         break;
       case 'section':
-        content += `\\needspace{8\\baselineskip}\n\\section*{${block.data.title}}\n\n`;
+        content += `\\needspace{8\\baselineskip}\n\\section*{${htmlToLatex(block.data.title || '')}}\n\n`;
         break;
       case 'paragraph':
         content += `${htmlToLatex(block.data.content)}\n\n`;
@@ -51,7 +51,7 @@ export const generateLatex = (blocks: any[]) => {
       case 'examplebox':
         let boxContent = block.data.items && block.data.items.length > 0 ? renderInnerBlocks(block.data.items) : (block.data.content ? `${htmlToLatex(block.data.content)}\n\n` : '');
         let envName = block.type;
-        content += `\\begin{${envName}}[${block.data.title}]\n${boxContent}\\end{${envName}}\n\n`;
+        content += `\\begin{${envName}}[${htmlToLatex(block.data.title || '')}]\n${boxContent}\\end{${envName}}\n\n`;
         break;
       default:
         break;

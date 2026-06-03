@@ -3,6 +3,24 @@ export function htmlToLatex(html: string): string {
   
   let tex = html;
   
+  // Unescape HTML entities first so they don't break our English text regex
+  tex = tex.replace(/&nbsp;/g, ' ');
+  tex = tex.replace(/&lt;/g, '<');
+  tex = tex.replace(/&gt;/g, '>');
+  tex = tex.replace(/&amp;/g, '&');
+
+  // Wrap English text in \lr{} - skipping HTML tags
+  tex = tex.replace(/(<[^>]+>)|([A-Za-z0-9\s.,;:!?'"()\[\]{}\-+=*/%&$#@]+)/g, (match, tag, text) => {
+    if (tag) return match;
+    if (text && /[A-Za-z]/.test(text)) {
+      const spaceMatch = text.match(/^(\s*)([\s\S]*?)(\s*)$/);
+      if (spaceMatch) {
+         return `${spaceMatch[1]}\\lr{${spaceMatch[2]}}${spaceMatch[3]}`;
+      }
+    }
+    return match;
+  });
+
   // Clean up div and p tags representing new lines
   tex = tex.replace(/<div><br><\/div>/gi, '\n');
   tex = tex.replace(/<div>/gi, '\n');
@@ -32,12 +50,6 @@ export function htmlToLatex(html: string): string {
 
   // Strip remaining HTML tags
   tex = tex.replace(/<[^>]+>/g, '');
-
-  // Unescape HTML entities
-  tex = tex.replace(/&nbsp;/g, ' ');
-  tex = tex.replace(/&lt;/g, '<');
-  tex = tex.replace(/&gt;/g, '>');
-  tex = tex.replace(/&amp;/g, '&');
 
   return tex.trim();
 }
