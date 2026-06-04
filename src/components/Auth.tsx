@@ -102,7 +102,7 @@ export function LoginModal({ onClose, onLogin }: LoginModalProps) {
                   required
                   onChange={e => setUsername(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2B547E] text-left"
-                  placeholder="username"
+                  placeholder="Example: MDavoudi"
                   dir="ltr"
                 />
               </div>
@@ -116,7 +116,7 @@ export function LoginModal({ onClose, onLogin }: LoginModalProps) {
                 required
                 onChange={e => setEmail(e.target.value)}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2B547E] text-left"
-                placeholder="ایمیل خود را وارد کنید..."
+                placeholder="Example: MohammadDavoudi@gmail.com"
                 dir="ltr"
               />
             </div>
