@@ -3,11 +3,12 @@ export function htmlToLatex(html: string): string {
   
   let tex = html;
   
-  // Unescape HTML entities first so they don't break our English text regex
+  // Unescape &nbsp; first so they don't break our English text regex
   tex = tex.replace(/&nbsp;/g, ' ');
-  tex = tex.replace(/&lt;/g, '<');
-  tex = tex.replace(/&gt;/g, '>');
-  tex = tex.replace(/&amp;/g, '&');
+
+  // DON'T unescape &lt;, &gt;, &amp; here! If we do, literally typed <p> will turn into 
+  // actual HTML tags and get stripped by the cleanup regex at the end!
+  // Instead, they will be matched by the English regex because & l t ; are all in its charset.
 
   // Wrap English text in \lr{} - skipping HTML tags
   tex = tex.replace(/(<[^>]+>)|([A-Za-z0-9\s.,;:!?'"()\[\]{}\-+=*/%&$#@]+)/g, (match, tag, text) => {
@@ -50,6 +51,16 @@ export function htmlToLatex(html: string): string {
 
   // Strip remaining HTML tags
   tex = tex.replace(/<[^>]+>/g, '');
+
+  // Now that structural HTML tags are gone, we can safely unescape the literal characters user typed.
+  // We also escape & for LaTeX appropriately, so things like &amp; become \& in LaTeX.
+  tex = tex.replace(/&lt;/g, '<');
+  tex = tex.replace(/&gt;/g, '>');
+  tex = tex.replace(/&amp;/g, '\\&');
+  
+  // Also escape other common LaTeX special characters in normal text if they aren't already escaped
+  // We'll just escape % for now as it's the most common breaker (comment symbol).
+  tex = tex.replace(/(?<!\\)%/g, '\\%');
 
   return tex.trim();
 }
