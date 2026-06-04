@@ -56,3 +56,17 @@ export interface BoxBlock extends BaseBlock {
 }
 
 export type AnyBlock = HeaderBlock | SectionBlock | ParagraphBlock | BoxBlock | ListBlock | CodeBlock;
+
+export interface Project {
+  id: string;
+  user_id: string;
+  name: string;
+  data: AnyBlock[];
+  updated_at: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name?: string;
+}
