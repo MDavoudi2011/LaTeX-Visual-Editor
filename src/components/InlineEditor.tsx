@@ -21,6 +21,12 @@ export function InlineEditor({ html, onChange, tagName = 'div', className = '', 
     }
   }, [html]);
 
+  const handleInput = (e: React.FormEvent<HTMLElement>) => {
+    const value = e.currentTarget.innerHTML;
+    lastHtml.current = value;
+    onChange(value);
+  };
+
   const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
     const value = e.currentTarget.innerHTML;
     lastHtml.current = value;
@@ -50,6 +56,7 @@ export function InlineEditor({ html, onChange, tagName = 'div', className = '', 
     ref,
     className: `outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 cursor-text ${className}`,
     contentEditable: true,
+    onInput: handleInput,
     onBlur: handleBlur,
     onPaste: handlePaste,
     onKeyDown: handleKeyDown,

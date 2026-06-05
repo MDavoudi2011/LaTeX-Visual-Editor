@@ -97,7 +97,7 @@ function EditorApp() {
         supabaseDb.updateProject(currentProject.id, { data: blocks })
           .then(() => setSavingState('saved'))
           .catch(() => setSavingState('error'));
-      }, 1000);
+      }, 5000);
       return () => clearTimeout(timer);
     } else {
       setSavingState('saved');
