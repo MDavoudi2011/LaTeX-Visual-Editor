@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { Component, createRef } from 'react';
 
 interface InlineEditorProps {
   html: string;
@@ -8,38 +8,64 @@ interface InlineEditorProps {
   placeholder?: string;
 }
 
-export function InlineEditor({ html, onChange, tagName = 'div', className = '', placeholder }: InlineEditorProps) {
-  const ref = useRef<HTMLElement>(null);
-  const lastHtml = useRef(html);
+export class InlineEditor extends Component<InlineEditorProps> {
+  private ref = createRef<HTMLElement>();
+  private lastHtml: string;
 
-  useEffect(() => {
-    if (ref.current && html !== lastHtml.current) {
-      if (document.activeElement !== ref.current) {
-        ref.current.innerHTML = html;
-        lastHtml.current = html;
+  constructor(props: InlineEditorProps) {
+    super(props);
+    this.lastHtml = props.html;
+  }
+
+  shouldComponentUpdate(nextProps: InlineEditorProps) {
+    // Always update if structural props change
+    if (
+      nextProps.tagName !== this.props.tagName ||
+      nextProps.className !== this.props.className ||
+      nextProps.placeholder !== this.props.placeholder
+    ) {
+      return true;
+    }
+
+    // Only update if the html change came from OUTSIDE (e.g. block deleted/swapped, or loaded from DB)
+    // If nextProps.html equals what's currently in the DOM, it was just our own onChange propagating back down!
+    if (this.ref.current) {
+      if (nextProps.html !== this.ref.current.innerHTML && nextProps.html !== this.props.html) {
+        return true;
       }
     }
-  }, [html]);
+    
+    // Ignore updates that reflect our own typing, preventing cursor jumps!
+    return false;
+  }
 
-  const handleInput = (e: React.FormEvent<HTMLElement>) => {
+  componentDidUpdate() {
+    // If we did legitimately update from outside, sync the DOM manually to be safe
+    if (this.ref.current && this.props.html !== this.ref.current.innerHTML) {
+      this.ref.current.innerHTML = this.props.html;
+      this.lastHtml = this.props.html;
+    }
+  }
+
+  handleInput = (e: React.FormEvent<HTMLElement>) => {
     const value = e.currentTarget.innerHTML;
-    lastHtml.current = value;
-    onChange(value);
+    this.lastHtml = value;
+    this.props.onChange(value);
   };
 
-  const handleBlur = (e: React.FocusEvent<HTMLElement>) => {
+  handleBlur = (e: React.FocusEvent<HTMLElement>) => {
     const value = e.currentTarget.innerHTML;
-    lastHtml.current = value;
-    onChange(value);
+    this.lastHtml = value;
+    this.props.onChange(value);
   };
 
-  const handlePaste = (e: React.ClipboardEvent<HTMLElement>) => {
+  handlePaste = (e: React.ClipboardEvent<HTMLElement>) => {
     e.preventDefault();
     const text = e.clipboardData.getData('text/plain');
     document.execCommand('insertText', false, text);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
+  handleKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     if (e.ctrlKey && e.key === 'b') {
       e.preventDefault();
       document.execCommand('bold', false);
@@ -52,16 +78,18 @@ export function InlineEditor({ html, onChange, tagName = 'div', className = '', 
     }
   };
 
-  return React.createElement(tagName, {
-    ref,
-    className: `outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 cursor-text ${className}`,
-    contentEditable: true,
-    onInput: handleInput,
-    onBlur: handleBlur,
-    onPaste: handlePaste,
-    onKeyDown: handleKeyDown,
-    'data-placeholder': placeholder,
-    suppressContentEditableWarning: true,
-    dangerouslySetInnerHTML: { __html: html }
-  });
+  render() {
+    return React.createElement(this.props.tagName || 'div', {
+      ref: this.ref,
+      className: `outline-none min-h-[1.5em] empty:before:content-[attr(data-placeholder)] empty:before:text-gray-400 cursor-text ${this.props.className || ''}`,
+      contentEditable: true,
+      onInput: this.handleInput,
+      onBlur: this.handleBlur,
+      onPaste: this.handlePaste,
+      onKeyDown: this.handleKeyDown,
+      'data-placeholder': this.props.placeholder,
+      suppressContentEditableWarning: true,
+      dangerouslySetInnerHTML: { __html: this.props.html } // Only processed on initial mount or force update
+    });
+  }
 }
